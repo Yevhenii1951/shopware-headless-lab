@@ -47,3 +47,7 @@ export default async function Home() {
     </main>
   )
 }
+
+        <Link href="/cart" className="ml-4 text-sm text-blue-600 hover:underline">
+          Корзина
+        </Link>
