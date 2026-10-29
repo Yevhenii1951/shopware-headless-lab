@@ -15,6 +15,7 @@ import {
   selectShippingMethod,
 } from '@/lib/shopware/checkout'
 import { getCustomerAddresses } from '@/lib/shopware/addresses'
+import { evaluateCheckoutReadiness, ReadinessCode } from '@/lib/shopware/readiness'
 import { redirect } from 'next/navigation'
 import { logoutCustomer } from '@/lib/shopware/customer'
 
@@ -93,6 +94,14 @@ async function logoutAction() {
   redirect('/')
 }
 
+const MISSING_READINESS_LABELS: Record<ReadinessCode, string> = {
+  cart: 'Корзина пуста',
+  billingAddress: 'Не выбран адрес счёта',
+  shippingAddress: 'Не выбран адрес доставки',
+  paymentMethod: 'Не выбран способ оплаты',
+  shippingMethod: 'Не выбран способ доставки',
+}
+
 export default async function CartPage() {
   const [items, paymentMethods, shippingMethods, checkoutContext, addressResult] = await Promise.all([
     getCart().catch(() => []),
@@ -109,6 +118,7 @@ export default async function CartPage() {
   const { addresses, error: addressError } = addressResult
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const readiness = evaluateCheckoutReadiness(items, checkoutContext)
 
   return (
     <main className="mx-auto max-w-3xl p-6">
@@ -177,6 +187,15 @@ export default async function CartPage() {
             <p className="text-lg font-semibold">Итого: {total.toFixed(2)} €</p>
           </div>
           <section className="space-y-4 border-t pt-4">
+            <div className="text-sm">
+              {readiness.ready ? (
+                <p className="font-semibold text-green-700">Корзина готова к заказу</p>
+              ) : (
+                <ul className="list-disc pl-5 text-red-600">
+                  {readiness.missing.map((code) => <li key={code}>{MISSING_READINESS_LABELS[code]}</li>)}
+                </ul>
+              )}
+            </div>
             {addressError && <p role="alert" className="text-sm text-red-600">{addressError}</p>}
             {addresses.length > 0 && (
               <form action={selectCheckoutAddressesAction} className="space-y-2">
