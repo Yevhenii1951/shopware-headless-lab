@@ -5,6 +5,10 @@ type LoginResponse = {
   contextToken: string
 }
 
+export type CurrentCustomer = {
+  email: string
+}
+
 export const loginCustomer = async (
   email: string,
   password: string
@@ -26,4 +30,8 @@ export const loginCustomer = async (
 
 export const logoutCustomer = async (): Promise<unknown> => {
   return shopwareCartFetch<unknown>('/account/logout', {}, 'POST')
+}
+
+export const getCurrentCustomer = async (): Promise<CurrentCustomer> => {
+  return shopwareCartFetch<CurrentCustomer>('/account/customer', {}, 'POST')
 }
