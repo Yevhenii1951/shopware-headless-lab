@@ -33,3 +33,7 @@ export const getAvailableShippingMethods = async (): Promise<CheckoutMethod[]> =
 export const selectPaymentMethod = async (paymentMethodId: string): Promise<unknown> => {
   return shopwareCartFetch<unknown>('/context', { paymentMethodId }, 'PATCH', true)
 }
+
+export const selectShippingMethod = async (shippingMethodId: string): Promise<unknown> => {
+  return shopwareCartFetch<unknown>('/context', { shippingMethodId }, 'PATCH', true)
+}
