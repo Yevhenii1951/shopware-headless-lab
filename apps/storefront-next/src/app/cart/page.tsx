@@ -4,6 +4,11 @@ import {
   removeFromCart,
   updateCartItemQuantity,
 } from '@/lib/shopware/cart'
+import {
+  getAvailablePaymentMethods,
+  getAvailableShippingMethods,
+  selectPaymentMethod,
+} from '@/lib/shopware/checkout'
 import { redirect } from 'next/navigation'
 
 export const instant = false
@@ -34,8 +39,21 @@ async function updateQuantityAction(formData: FormData) {
   redirect('/cart')
 }
 
+async function selectPaymentMethodAction(formData: FormData) {
+  'use server'
+  const paymentMethodId = formData.get('paymentMethodId')
+  if (typeof paymentMethodId !== 'string' || !paymentMethodId) return
+
+  await selectPaymentMethod(paymentMethodId)
+  redirect('/cart')
+}
+
 export default async function CartPage() {
-  const items = await getCart().catch(() => [])
+  const [items, paymentMethods, shippingMethods] = await Promise.all([
+    getCart().catch(() => []),
+    getAvailablePaymentMethods().catch(() => []),
+    getAvailableShippingMethods().catch(() => []),
+  ])
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -102,6 +120,21 @@ export default async function CartPage() {
           <div className="border-t pt-4 text-right">
             <p className="text-lg font-semibold">Итого: {total.toFixed(2)} €</p>
           </div>
+          <section className="space-y-4 border-t pt-4">
+            <div>
+              <h2 className="font-semibold">Доставка</h2>
+              <ul className="mt-2 text-sm text-gray-700">
+                {shippingMethods.map((method) => <li key={method.id}>{method.name}</li>)}
+              </ul>
+            </div>
+            <form action={selectPaymentMethodAction} className="space-y-2">
+              <label htmlFor="payment-method" className="block font-semibold">Оплата</label>
+              <select id="payment-method" name="paymentMethodId" className="rounded border p-2">
+                {paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
+              </select>
+              <button type="submit" className="ml-2 rounded bg-black px-4 py-2 text-white">Выбрать оплату</button>
+            </form>
+          </section>
         </div>
       )}
     </main>

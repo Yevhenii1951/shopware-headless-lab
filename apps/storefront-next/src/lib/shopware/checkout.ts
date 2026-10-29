@@ -1,0 +1,35 @@
+import { shopwareCartFetch } from './cart-client'
+
+export type CheckoutMethod = {
+  id: string
+  name: string
+}
+
+type StoreApiMethodResponse = {
+  elements: Array<{
+    id: string
+    name?: string
+    translated?: { name?: string }
+  }>
+}
+
+const mapMethods = (data: StoreApiMethodResponse): CheckoutMethod[] => {
+  return data.elements.map((method) => ({
+    id: method.id,
+    name: method.translated?.name || method.name || 'Без названия',
+  }))
+}
+
+export const getAvailablePaymentMethods = async (): Promise<CheckoutMethod[]> => {
+  const data = await shopwareCartFetch<StoreApiMethodResponse>('/payment-method?onlyAvailable=1', {})
+  return mapMethods(data)
+}
+
+export const getAvailableShippingMethods = async (): Promise<CheckoutMethod[]> => {
+  const data = await shopwareCartFetch<StoreApiMethodResponse>('/shipping-method?onlyAvailable=1', {})
+  return mapMethods(data)
+}
+
+export const selectPaymentMethod = async (paymentMethodId: string): Promise<unknown> => {
+  return shopwareCartFetch<unknown>('/context', { paymentMethodId }, 'PATCH', true)
+}
