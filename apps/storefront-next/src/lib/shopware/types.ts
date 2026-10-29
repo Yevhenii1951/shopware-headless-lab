@@ -22,3 +22,19 @@ export type StoreApiProductResponse = {
     }
   }>
 }
+
+export type ShopwareProductDetail = {
+  id: string
+  name: string
+  price: number
+  description?: string | null
+}
+
+export type StoreApiProductDetailResponse = {
+  id: string
+  name: string
+  calculatedPrice?: {
+    unitPrice?: number
+  }
+  description?: string | null
+}
