@@ -15,7 +15,12 @@ import {
   selectShippingMethod,
 } from '@/lib/shopware/checkout'
 import { getCustomerAddresses } from '@/lib/shopware/addresses'
-import { evaluateCheckoutReadiness, ReadinessCode } from '@/lib/shopware/readiness'
+import {
+  evaluateCheckoutReadiness,
+  getCheckoutReadiness,
+  ReadinessCode,
+} from '@/lib/shopware/readiness'
+import { createDemoOrder } from '@/lib/shopware/order'
 import { redirect } from 'next/navigation'
 import { logoutCustomer } from '@/lib/shopware/customer'
 
@@ -80,6 +85,22 @@ async function selectCheckoutAddressesAction(formData: FormData) {
   redirect('/cart')
 }
 
+async function createDemoOrderAction() {
+  'use server'
+  const readiness = await getCheckoutReadiness()
+  if (!readiness.ready) redirect('/cart')
+
+  try {
+    const order = await createDemoOrder()
+    redirect(`/cart?orderNumber=${encodeURIComponent(order.orderNumber)}`)
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.startsWith('Shopware Store API error:')) {
+      throw error
+    }
+    redirect('/cart?orderError=1')
+  }
+}
+
 async function logoutAction() {
   'use server'
   try {
@@ -102,7 +123,12 @@ const MISSING_READINESS_LABELS: Record<ReadinessCode, string> = {
   shippingMethod: 'Не выбран способ доставки',
 }
 
-export default async function CartPage() {
+export default async function CartPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ orderNumber?: string; orderError?: string }>
+}) {
+  const { orderNumber: confirmedOrderNumber, orderError } = await searchParams
   const [items, paymentMethods, shippingMethods, checkoutContext, addressResult] = await Promise.all([
     getCart().catch(() => []),
     getAvailablePaymentMethods().catch(() => []),
@@ -131,6 +157,18 @@ export default async function CartPage() {
           <button type="submit" className="text-sm text-blue-600 hover:underline">Выйти</button>
         </form>
       </div>
+
+      {confirmedOrderNumber && (
+        <p role="status" className="mb-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+          Demo заказ {confirmedOrderNumber} создан.
+        </p>
+      )}
+
+      {orderError && (
+        <p role="alert" className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+          Не удалось создать заказ. Попробуйте снова.
+        </p>
+      )}
 
       {items.length === 0 ? (
         <p className="text-sm text-gray-500">Корзина пустая.</p>
@@ -235,6 +273,11 @@ export default async function CartPage() {
               </select>
               <button type="submit" className="ml-2 rounded bg-black px-4 py-2 text-white">Выбрать оплату</button>
             </form>
+            {readiness.ready && (
+              <form action={createDemoOrderAction} className="border-t pt-4">
+                <button type="submit" className="rounded bg-black px-6 py-2 text-white font-semibold">Оформить demo заказ</button>
+              </form>
+            )}
           </section>
         </div>
       )}
