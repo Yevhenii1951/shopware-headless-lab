@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getCategories } from '@/lib/shopware/categories'
+import { getCurrentCustomer } from '@/lib/shopware/customer'
 import { getProducts } from '@/lib/shopware/products'
 
 export const instant = false
@@ -9,9 +10,10 @@ type HomeSearchParams = Promise<{ categoryId?: string | string[] }>
 export default async function Home({ searchParams }: { searchParams: HomeSearchParams }) {
   const { categoryId } = await searchParams
   const selectedCategoryId = typeof categoryId === 'string' ? categoryId : undefined
-  const [categories, products] = await Promise.all([
+  const [categories, products, customer] = await Promise.all([
     getCategories().catch(() => []),
     getProducts(selectedCategoryId).catch(() => []),
+    getCurrentCustomer().catch(() => null),
   ])
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId)
 
@@ -19,9 +21,10 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
     <main className="mx-auto max-w-6xl p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">Shopware Headless Lab</h1>
-        <Link href="/cart" className="text-sm text-blue-600 hover:underline">
-          Корзина
-        </Link>
+        <div className="flex items-center gap-4 text-sm text-blue-600">
+          {customer ? <span className="text-gray-700">{customer.email}</span> : <Link href="/login" className="hover:underline">Войти</Link>}
+          <Link href="/cart" className="hover:underline">Корзина</Link>
+        </div>
       </div>
 
       <section className="mb-10">
