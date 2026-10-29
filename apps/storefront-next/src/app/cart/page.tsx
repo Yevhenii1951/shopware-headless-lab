@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import {
   getCart,
   removeFromCart,
@@ -10,6 +11,7 @@ import {
   selectPaymentMethod,
 } from '@/lib/shopware/checkout'
 import { redirect } from 'next/navigation'
+import { logoutCustomer } from '@/lib/shopware/customer'
 
 export const instant = false
 
@@ -48,6 +50,20 @@ async function selectPaymentMethodAction(formData: FormData) {
   redirect('/cart')
 }
 
+async function logoutAction() {
+  'use server'
+  try {
+    await logoutCustomer()
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== 'Shopware Store API error: 403') {
+      throw error
+    }
+  }
+  const cookieStore = await cookies()
+  cookieStore.delete('sw-context-token')
+  redirect('/')
+}
+
 export default async function CartPage() {
   const [items, paymentMethods, shippingMethods] = await Promise.all([
     getCart().catch(() => []),
@@ -64,6 +80,9 @@ export default async function CartPage() {
         <Link href="/" className="text-sm text-blue-600 hover:underline">
           ← На главную
         </Link>
+        <form action={logoutAction}>
+          <button type="submit" className="text-sm text-blue-600 hover:underline">Выйти</button>
+        </form>
       </div>
 
       {items.length === 0 ? (
