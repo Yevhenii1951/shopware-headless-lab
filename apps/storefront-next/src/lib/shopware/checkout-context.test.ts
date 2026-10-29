@@ -12,9 +12,40 @@ describe('getCheckoutContext', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
       ok: true,
       headers: new Headers(),
-      json: async () => ({ paymentMethod: { id: 'payment-1' }, shippingMethod: { id: 'shipping-1' } }),
+      json: async () => ({
+        paymentMethod: { id: 'payment-1' },
+        shippingMethod: { id: 'shipping-1' },
+        customer: {
+          activeBillingAddress: { id: 'billing-address-1' },
+          activeShippingAddress: { id: 'shipping-address-1' },
+        },
+      }),
     } as Response))
 
-    await expect(getCheckoutContext()).resolves.toEqual({ paymentMethodId: 'payment-1', shippingMethodId: 'shipping-1' })
+    await expect(getCheckoutContext()).resolves.toEqual({
+      paymentMethodId: 'payment-1',
+      shippingMethodId: 'shipping-1',
+      billingAddressId: 'billing-address-1',
+      shippingAddressId: 'shipping-address-1',
+    })
+  })
+
+  it('keeps payment and shipping methods available for a guest context', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      headers: new Headers(),
+      json: async () => ({
+        paymentMethod: { id: 'payment-1' },
+        shippingMethod: { id: 'shipping-1' },
+        customer: null,
+      }),
+    } as Response))
+
+    await expect(getCheckoutContext()).resolves.toEqual({
+      paymentMethodId: 'payment-1',
+      shippingMethodId: 'shipping-1',
+      billingAddressId: undefined,
+      shippingAddressId: undefined,
+    })
   })
 })

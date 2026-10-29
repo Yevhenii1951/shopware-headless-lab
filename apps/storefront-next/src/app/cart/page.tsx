@@ -9,9 +9,12 @@ import {
   getAvailablePaymentMethods,
   getAvailableShippingMethods,
   getCheckoutContext,
+  parseCheckoutAddressSelection,
+  selectCheckoutAddresses,
   selectPaymentMethod,
   selectShippingMethod,
 } from '@/lib/shopware/checkout'
+import { getCustomerAddresses } from '@/lib/shopware/addresses'
 import { redirect } from 'next/navigation'
 import { logoutCustomer } from '@/lib/shopware/customer'
 
@@ -61,6 +64,21 @@ async function selectShippingMethodAction(formData: FormData) {
   redirect('/cart')
 }
 
+async function selectCheckoutAddressesAction(formData: FormData) {
+  'use server'
+  const addressSelection = parseCheckoutAddressSelection({
+    billingAddressId: formData.get('billingAddressId'),
+    shippingAddressId: formData.get('shippingAddressId'),
+  })
+  if (!addressSelection) return
+
+  await selectCheckoutAddresses(
+    addressSelection.billingAddressId,
+    addressSelection.shippingAddressId
+  )
+  redirect('/cart')
+}
+
 async function logoutAction() {
   'use server'
   try {
@@ -76,12 +94,19 @@ async function logoutAction() {
 }
 
 export default async function CartPage() {
-  const [items, paymentMethods, shippingMethods, checkoutContext] = await Promise.all([
+  const [items, paymentMethods, shippingMethods, checkoutContext, addressResult] = await Promise.all([
     getCart().catch(() => []),
     getAvailablePaymentMethods().catch(() => []),
     getAvailableShippingMethods().catch(() => []),
     getCheckoutContext().catch(() => null),
+    getCustomerAddresses()
+      .then((addresses) => ({ addresses, error: null }))
+      .catch(() => ({
+        addresses: [],
+        error: 'Адреса недоступны. Войдите, чтобы выбрать адрес.',
+      })),
   ])
+  const { addresses, error: addressError } = addressResult
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
@@ -152,6 +177,31 @@ export default async function CartPage() {
             <p className="text-lg font-semibold">Итого: {total.toFixed(2)} €</p>
           </div>
           <section className="space-y-4 border-t pt-4">
+            {addressError && <p role="alert" className="text-sm text-red-600">{addressError}</p>}
+            {addresses.length > 0 && (
+              <form action={selectCheckoutAddressesAction} className="space-y-2">
+                <p className="font-semibold">Адреса</p>
+                <label htmlFor="shipping-address" className="block text-sm">Доставка</label>
+                <select
+                  id="shipping-address"
+                  name="shippingAddressId"
+                  defaultValue={checkoutContext?.shippingAddressId}
+                  className="rounded border p-2"
+                >
+                  {addresses.map((address) => <option key={address.id} value={address.id}>{address.label}</option>)}
+                </select>
+                <label htmlFor="billing-address" className="block text-sm">Счёт</label>
+                <select
+                  id="billing-address"
+                  name="billingAddressId"
+                  defaultValue={checkoutContext?.billingAddressId}
+                  className="rounded border p-2"
+                >
+                  {addresses.map((address) => <option key={address.id} value={address.id}>{address.label}</option>)}
+                </select>
+                <button type="submit" className="block rounded bg-black px-4 py-2 text-white">Выбрать адреса</button>
+              </form>
+            )}
             <form action={selectShippingMethodAction} className="space-y-2">
               <label htmlFor="shipping-method" className="block font-semibold">Доставка</label>
               <select id="shipping-method" name="shippingMethodId" defaultValue={checkoutContext?.shippingMethodId} className="rounded border p-2">

@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { shopwareCartFetch } from './cart-client'
 
 export type CheckoutMethod = {
@@ -5,10 +6,22 @@ export type CheckoutMethod = {
   name: string
 }
 
-export type CheckoutContext = {
+export interface CheckoutContext {
   paymentMethodId: string
   shippingMethodId: string
+  billingAddressId?: string
+  shippingAddressId?: string
 }
+
+export interface CheckoutAddressSelection {
+  billingAddressId: string
+  shippingAddressId: string
+}
+
+const checkoutAddressSelectionSchema = z.object({
+  billingAddressId: z.string().regex(/^[0-9a-f]{32}$/i),
+  shippingAddressId: z.string().regex(/^[0-9a-f]{32}$/i),
+})
 
 type StoreApiMethodResponse = {
   elements: Array<{
@@ -43,13 +56,38 @@ export const selectShippingMethod = async (shippingMethodId: string): Promise<un
   return shopwareCartFetch<unknown>('/context', { shippingMethodId }, 'PATCH', true)
 }
 
+export const selectCheckoutAddresses = async (
+  billingAddressId: string,
+  shippingAddressId: string
+): Promise<unknown> => {
+  return shopwareCartFetch<unknown>(
+    '/context',
+    { billingAddressId, shippingAddressId },
+    'PATCH',
+    true
+  )
+}
+
+export const parseCheckoutAddressSelection = (
+  input: unknown
+): CheckoutAddressSelection | null => {
+  const result = checkoutAddressSelectionSchema.safeParse(input)
+  return result.success ? result.data : null
+}
+
 export const getCheckoutContext = async (): Promise<CheckoutContext> => {
   const data = await shopwareCartFetch<{
     paymentMethod: { id: string }
     shippingMethod: { id: string }
+    customer?: {
+      activeBillingAddress?: { id: string }
+      activeShippingAddress?: { id: string }
+    }
   }>('/context', undefined, 'GET')
   return {
     paymentMethodId: data.paymentMethod.id,
     shippingMethodId: data.shippingMethod.id,
+    billingAddressId: data.customer?.activeBillingAddress?.id,
+    shippingAddressId: data.customer?.activeShippingAddress?.id,
   }
 }
