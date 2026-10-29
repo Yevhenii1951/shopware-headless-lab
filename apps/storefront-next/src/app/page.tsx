@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getCategories } from '@/lib/shopware/categories'
 import { getProducts } from '@/lib/shopware/products'
 
@@ -34,7 +35,9 @@ export default async function Home() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
               <article key={product.id} className="rounded border p-4">
-                <h3 className="mb-2 font-medium">{product.name}</h3>
+                <Link href={`/product/${product.id}`} className="hover:underline">
+                  <h3 className="mb-2 font-medium">{product.name || 'Без названия'}</h3>
+                </Link>
                 <p className="text-sm text-gray-600">{product.price.toFixed(2)} €</p>
               </article>
             ))}
