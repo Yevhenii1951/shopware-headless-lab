@@ -5,6 +5,11 @@ export type CheckoutMethod = {
   name: string
 }
 
+export type CheckoutContext = {
+  paymentMethodId: string
+  shippingMethodId: string
+}
+
 type StoreApiMethodResponse = {
   elements: Array<{
     id: string
@@ -36,4 +41,15 @@ export const selectPaymentMethod = async (paymentMethodId: string): Promise<unkn
 
 export const selectShippingMethod = async (shippingMethodId: string): Promise<unknown> => {
   return shopwareCartFetch<unknown>('/context', { shippingMethodId }, 'PATCH', true)
+}
+
+export const getCheckoutContext = async (): Promise<CheckoutContext> => {
+  const data = await shopwareCartFetch<{
+    paymentMethod: { id: string }
+    shippingMethod: { id: string }
+  }>('/context', undefined, 'GET')
+  return {
+    paymentMethodId: data.paymentMethod.id,
+    shippingMethodId: data.shippingMethod.id,
+  }
 }

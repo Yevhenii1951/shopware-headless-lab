@@ -8,6 +8,7 @@ import {
 import {
   getAvailablePaymentMethods,
   getAvailableShippingMethods,
+  getCheckoutContext,
   selectPaymentMethod,
   selectShippingMethod,
 } from '@/lib/shopware/checkout'
@@ -75,10 +76,11 @@ async function logoutAction() {
 }
 
 export default async function CartPage() {
-  const [items, paymentMethods, shippingMethods] = await Promise.all([
+  const [items, paymentMethods, shippingMethods, checkoutContext] = await Promise.all([
     getCart().catch(() => []),
     getAvailablePaymentMethods().catch(() => []),
     getAvailableShippingMethods().catch(() => []),
+    getCheckoutContext().catch(() => null),
   ])
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -152,14 +154,14 @@ export default async function CartPage() {
           <section className="space-y-4 border-t pt-4">
             <form action={selectShippingMethodAction} className="space-y-2">
               <label htmlFor="shipping-method" className="block font-semibold">Доставка</label>
-              <select id="shipping-method" name="shippingMethodId" className="rounded border p-2">
+              <select id="shipping-method" name="shippingMethodId" defaultValue={checkoutContext?.shippingMethodId} className="rounded border p-2">
                 {shippingMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
               </select>
               <button type="submit" className="ml-2 rounded bg-black px-4 py-2 text-white">Выбрать доставку</button>
             </form>
             <form action={selectPaymentMethodAction} className="space-y-2">
               <label htmlFor="payment-method" className="block font-semibold">Оплата</label>
-              <select id="payment-method" name="paymentMethodId" className="rounded border p-2">
+              <select id="payment-method" name="paymentMethodId" defaultValue={checkoutContext?.paymentMethodId} className="rounded border p-2">
                 {paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
               </select>
               <button type="submit" className="ml-2 rounded bg-black px-4 py-2 text-white">Выбрать оплату</button>
