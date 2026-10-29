@@ -10,12 +10,17 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-2xl font-bold">Shopware Headless Lab</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Shopware Headless Lab</h1>
+        <Link href="/cart" className="text-sm text-blue-600 hover:underline">
+          Корзина
+        </Link>
+      </div>
 
       <section className="mb-10">
         <h2 className="mb-3 text-xl font-semibold">Категории</h2>
         {categories.length === 0 ? (
-          <p className="text-sm text-gray-500">Категории не найдены. Проверьте подключение к Shopware Store API.</p>
+          <p className="text-sm text-gray-500">Категории не найдёдны. Проверьте подключение к Shopware Store API.</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
             {categories.map((category) => (
@@ -47,7 +52,3 @@ export default async function Home() {
     </main>
   )
 }
-
-        <Link href="/cart" className="ml-4 text-sm text-blue-600 hover:underline">
-          Корзина
-        </Link>
