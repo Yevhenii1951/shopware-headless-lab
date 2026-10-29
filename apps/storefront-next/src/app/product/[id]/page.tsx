@@ -1,5 +1,15 @@
 import Link from 'next/link'
 import { getProductById } from '@/lib/shopware/products'
+import { addToCart } from '@/lib/shopware/cart'
+import { redirect } from 'next/navigation'
+
+async function addToCartAction(formData: FormData) {
+  'use server'
+  const productId = formData.get('productId') as string
+  if (!productId) return
+  await addToCart(productId, 1).catch(() => {})
+  redirect('/cart')
+}
 
 export default async function ProductPage({
   params,
@@ -25,9 +35,14 @@ export default async function ProductPage({
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <Link href="/" className="text-sm text-blue-600 hover:underline">
-        ← Назад на главную
-      </Link>
+      <div className="mb-4 flex items-center justify-between">
+        <Link href="/" className="text-sm text-blue-600 hover:underline">
+          ← Назад на главную
+        </Link>
+        <Link href="/cart" className="text-sm text-blue-600 hover:underline">
+          Корзина
+        </Link>
+      </div>
       <article className="mt-6">
         <h1 className="text-2xl font-bold">{product.name}</h1>
         <p className="mt-2 text-lg text-gray-700">{product.price.toFixed(2)} €</p>
@@ -36,6 +51,15 @@ export default async function ProductPage({
             <p>{product.description}</p>
           </div>
         )}
+        <form action={addToCartAction} className="mt-6">
+          <input type="hidden" name="productId" value={product.id} />
+          <button
+            type="submit"
+            className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800"
+          >
+            Добавить в корзину
+          </button>
+        </form>
       </article>
     </main>
   )
