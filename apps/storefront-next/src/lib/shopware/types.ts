@@ -6,3 +6,19 @@ export type ShopwareCategory = {
 export type StoreApiCategoryResponse = {
   elements: ShopwareCategory[]
 }
+
+export type ShopwareProduct = {
+  id: string
+  name: string
+  price: number
+}
+
+export type StoreApiProductResponse = {
+  elements: Array<{
+    id: string
+    name: string
+    calculatedPrice?: {
+      unitPrice?: number
+    }
+  }>
+}
