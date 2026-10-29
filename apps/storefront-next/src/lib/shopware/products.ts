@@ -13,10 +13,22 @@ const mapProduct = (product: StoreApiProduct): ShopwareProduct => ({
   price: product.calculatedPrice?.unitPrice ?? product.price?.unitPrice ?? 0,
 })
 
-export const getProducts = async (): Promise<ShopwareProduct[]> => {
+export const getProducts = async (categoryId?: string): Promise<ShopwareProduct[]> => {
   'use cache'
 
-  const data = await shopwareFetch<StoreApiProductResponse>('/product', { limit: 10 })
+  const criteria = categoryId
+    ? {
+        limit: 10,
+        filter: [
+          {
+            type: 'equals',
+            field: 'categories.id',
+            value: categoryId,
+          },
+        ],
+      }
+    : { limit: 10 }
+  const data = await shopwareFetch<StoreApiProductResponse>('/product', criteria)
   return data.elements.map(mapProduct)
 }
 

@@ -2,11 +2,18 @@ import Link from 'next/link'
 import { getCategories } from '@/lib/shopware/categories'
 import { getProducts } from '@/lib/shopware/products'
 
-export default async function Home() {
+export const instant = false
+
+type HomeSearchParams = Promise<{ categoryId?: string | string[] }>
+
+export default async function Home({ searchParams }: { searchParams: HomeSearchParams }) {
+  const { categoryId } = await searchParams
+  const selectedCategoryId = typeof categoryId === 'string' ? categoryId : undefined
   const [categories, products] = await Promise.all([
     getCategories().catch(() => []),
-    getProducts().catch(() => []),
+    getProducts(selectedCategoryId).catch(() => []),
   ])
+  const selectedCategory = categories.find((category) => category.id === selectedCategoryId)
 
   return (
     <main className="mx-auto max-w-6xl p-6">
@@ -23,9 +30,16 @@ export default async function Home() {
           <p className="text-sm text-gray-500">Категории не найдены. Проверьте подключение к Shopware Store API.</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
+            <li>
+              <Link href="/" className="rounded border px-3 py-1 hover:underline">
+                Все товары
+              </Link>
+            </li>
             {categories.map((category) => (
               <li key={category.id} className="rounded border px-3 py-1">
-                {category.name}
+                <Link href={`/?categoryId=${category.id}`} className="hover:underline">
+                  {category.name}
+                </Link>
               </li>
             ))}
           </ul>
@@ -33,7 +47,9 @@ export default async function Home() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-xl font-semibold">Товары</h2>
+        <h2 className="mb-3 text-xl font-semibold">
+          {selectedCategory ? `Товары: ${selectedCategory.name}` : 'Товары'}
+        </h2>
         {products.length === 0 ? (
           <p className="text-sm text-gray-500">Товары не найдены. Проверьте подключение к Shopware Store API.</p>
         ) : (
