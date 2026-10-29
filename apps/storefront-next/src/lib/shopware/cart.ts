@@ -22,3 +22,20 @@ export const getCart = async (): Promise<CartItem[]> => {
     price: item.price?.unitPrice ?? 0,
   }))
 }
+
+export const addToCart = async (productId: string, quantity: number = 1) => {
+  const data = await shopwareFetch<{ lineItems?: CartItem[] }>(
+    '/checkout/cart/line-item',
+    {
+      items: [
+        {
+          id: productId,
+          type: 'product',
+          quantity,
+        },
+      ],
+    },
+    'POST'
+  )
+  return data
+}
