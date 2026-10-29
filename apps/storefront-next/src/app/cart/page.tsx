@@ -9,6 +9,7 @@ import {
   getAvailablePaymentMethods,
   getAvailableShippingMethods,
   selectPaymentMethod,
+  selectShippingMethod,
 } from '@/lib/shopware/checkout'
 import { redirect } from 'next/navigation'
 import { logoutCustomer } from '@/lib/shopware/customer'
@@ -47,6 +48,15 @@ async function selectPaymentMethodAction(formData: FormData) {
   if (typeof paymentMethodId !== 'string' || !paymentMethodId) return
 
   await selectPaymentMethod(paymentMethodId)
+  redirect('/cart')
+}
+
+async function selectShippingMethodAction(formData: FormData) {
+  'use server'
+  const shippingMethodId = formData.get('shippingMethodId')
+  if (typeof shippingMethodId !== 'string' || !shippingMethodId) return
+
+  await selectShippingMethod(shippingMethodId)
   redirect('/cart')
 }
 
@@ -140,12 +150,13 @@ export default async function CartPage() {
             <p className="text-lg font-semibold">Итого: {total.toFixed(2)} €</p>
           </div>
           <section className="space-y-4 border-t pt-4">
-            <div>
-              <h2 className="font-semibold">Доставка</h2>
-              <ul className="mt-2 text-sm text-gray-700">
-                {shippingMethods.map((method) => <li key={method.id}>{method.name}</li>)}
-              </ul>
-            </div>
+            <form action={selectShippingMethodAction} className="space-y-2">
+              <label htmlFor="shipping-method" className="block font-semibold">Доставка</label>
+              <select id="shipping-method" name="shippingMethodId" className="rounded border p-2">
+                {shippingMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
+              </select>
+              <button type="submit" className="ml-2 rounded bg-black px-4 py-2 text-white">Выбрать доставку</button>
+            </form>
             <form action={selectPaymentMethodAction} className="space-y-2">
               <label htmlFor="payment-method" className="block font-semibold">Оплата</label>
               <select id="payment-method" name="paymentMethodId" className="rounded border p-2">
