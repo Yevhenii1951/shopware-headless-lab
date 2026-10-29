@@ -1,6 +1,16 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { getCart } from '@/lib/shopware/cart'
+import { removeFromCart } from '@/lib/shopware/cart'
+import { redirect } from 'next/navigation'
+
+async function removeItemAction(formData: FormData) {
+  'use server'
+  const lineItemId = formData.get('lineItemId') as string
+  if (!lineItemId) return
+  await removeFromCart(lineItemId).catch(() => {})
+  redirect('/cart')
+}
 
 export default async function CartPage() {
   const cookieStore = await cookies()
@@ -29,7 +39,15 @@ export default async function CartPage() {
                   <p className="font-medium">{item.name}</p>
                   <p className="text-sm text-gray-600">Кол-во: {item.quantity}</p>
                 </div>
-                <p className="text-sm text-gray-700">{(item.price * item.quantity).toFixed(2)} €</p>
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-gray-700">{(item.price * item.quantity).toFixed(2)} €</p>
+                  <form action={removeItemAction}>
+                    <input type="hidden" name="lineItemId" value={item.id} />
+                    <button type="submit" className="text-sm text-red-600 hover:underline">
+                      Удалить
+                    </button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>

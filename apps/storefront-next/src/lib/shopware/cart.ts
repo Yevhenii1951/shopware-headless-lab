@@ -39,3 +39,12 @@ export const addToCart = async (productId: string, quantity: number = 1) => {
   )
   return data
 }
+
+export const removeFromCart = async (lineItemId: string) => {
+  const data = await shopwareFetch<any>(
+    `/checkout/cart/line-item/${lineItemId}`,
+    undefined,
+    'DELETE'
+  )
+  return data
+}
