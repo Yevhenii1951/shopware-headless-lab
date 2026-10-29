@@ -1,7 +1,10 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { getCart } from '@/lib/shopware/cart'
 
 export default async function CartPage() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('sw-context-token')?.value
   const items = await getCart().catch(() => [])
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
