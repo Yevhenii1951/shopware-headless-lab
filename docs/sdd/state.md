@@ -1,15 +1,8 @@
 # State
 
-- Purpose: LEARNING; cart flow through the Shopware Store API.
-- Done: cart quantity update via `PATCH /checkout/cart/line-item` with `sw-context-token`.
-- Done: `−` is disabled at quantity 1; deletion remains an explicit action.
-- Done: category URL filter using Store API `equals categories.id`; heading names the selected category.
-- Done: checkout preparation lists available shipping/payment methods and changes payment through `PATCH /context`.
-- Done: customer login helper and `/login` form authenticate through Store API.
-- Checks: Vitest 10/10, TypeScript, ESLint and `next build` pass.
-- Verified against Shopware: category filter returned six products including the original related product.
-- Verified against Shopware: `GET /context` confirmed the payment method selected by `PATCH /context`.
-- Environment: Shopware container `shopware-demo` is running on `localhost:8000`.
-- Verified in browser: cart quantity update plus shipping/payment list and payment form submission.
-- Verified in browser: demo customer login redirects to `/cart` and persists the session context.
-- Next: add login navigation/logout or inspect the official contract before selectable shipping.
+- Purpose: LEARNING. Tier: Lite.
+- Phase 1 done: catalogue, category filter, cart mutations, checkout context selection, login/logout and session indicator.
+- Phase 2 intent/spec/tickets now define Store API mastery through one local demo order, without real payments or Admin API.
+- Latest verification: Vitest 14/14, TypeScript, ESLint, production build; browser preserved Express selection after redirect.
+- Environment: Shopware container `shopware-demo` at `localhost:8000`; dedicated demo customer exists locally.
+- Next ticket: SWL-202 address context. Read its ticket, Phase 2 spec and current Store API address docs before coding.

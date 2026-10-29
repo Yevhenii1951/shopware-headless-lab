@@ -1,0 +1,3 @@
+# Intent — Phase 2
+
+Learn to drive one complete, local Shopware customer journey through the Store API: customer session, addresses, cart checkout context, one demo order, and order retrieval. The result is a documented sequence of verifiable API contracts and a minimal Next.js UI, not a production storefront. Real payment providers, Admin API, deployment, and any customer data beyond the dedicated demo account are out of scope. Each ticket must keep an observable acceptance scenario, a test at the public helper seam where behaviour computes, and command/browser evidence before it is committed.
