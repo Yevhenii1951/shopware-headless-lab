@@ -24,3 +24,8 @@
 - FR-4.1. Добавить `removeFromCart(lineItemId)` 
 - FR-4.2. Использовать `DELETE /store-api/checkout/cart/line-item/{id}`
 - FR-4.3. Кнопка "Удалить" на странице `/cart`
+
+### FR-5. Изменение количества
+- FR-5.1. Добавить `updateCartItemQuantity(lineItemId, quantity)`
+- FR-5.2. Использовать `PATCH /store-api/checkout/cart/line-item` с ID позиции и новым количеством
+- FR-5.3. На странице `/cart` есть кнопки «−» и «+» для каждой позиции

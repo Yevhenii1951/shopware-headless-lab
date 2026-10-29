@@ -13,14 +13,25 @@ export type ShopwareProduct = {
   price: number
 }
 
+export type StoreApiProduct = {
+  id: string
+  name?: string | null
+  translated?: {
+    name?: string | null
+    description?: string | null
+  }
+  productNumber?: string | null
+  calculatedPrice?: {
+    unitPrice?: number
+  }
+  price?: {
+    unitPrice?: number
+  }
+  description?: string | null
+}
+
 export type StoreApiProductResponse = {
-  elements: Array<{
-    id: string
-    name: string
-    calculatedPrice?: {
-      unitPrice?: number
-    }
-  }>
+  elements: StoreApiProduct[]
 }
 
 export type ShopwareProductDetail = {
@@ -30,11 +41,7 @@ export type ShopwareProductDetail = {
   description?: string | null
 }
 
-export type StoreApiProductDetailResponse = {
-  id: string
-  name: string
-  calculatedPrice?: {
-    unitPrice?: number
-  }
-  description?: string | null
-}
+export type StoreApiProductDetailResponse =
+  | StoreApiProduct
+  | StoreApiProductResponse
+  | { product: StoreApiProduct }

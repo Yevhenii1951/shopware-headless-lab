@@ -3,7 +3,7 @@ import { removeFromCart } from './cart'
 
 describe('removeFromCart', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     process.env.NEXT_PUBLIC_SHOPWARE_STORE_API_URL = 'http://localhost:8000/store-api'
     process.env.SHOPWARE_STORE_API_ACCESS_KEY = 'test-access-key'
   })
@@ -11,6 +11,7 @@ describe('removeFromCart', () => {
   it('removes line item via DELETE to line-item endpoint', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
+      headers: new Headers(),
       json: async () => ({ lineItems: [] }),
     } as Response)
     vi.stubGlobal('fetch', fetchMock)

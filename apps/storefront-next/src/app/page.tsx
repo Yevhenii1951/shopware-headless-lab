@@ -23,7 +23,7 @@ export default async function Home() {
           <p className="text-sm text-gray-500">Категории не найдены. Проверьте подключение к Shopware Store API.</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
-            {categories.map((category: any) => (
+            {categories.map((category) => (
               <li key={category.id} className="rounded border px-3 py-1">
                 {category.name}
               </li>
@@ -38,7 +38,7 @@ export default async function Home() {
           <p className="text-sm text-gray-500">Товары не найдены. Проверьте подключение к Shopware Store API.</p>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((product: any) => (
+            {products.map((product) => (
               <article key={product.id} className="rounded border p-4">
                 <Link href={`/product/${product.id}`} className="hover:underline">
                   <h3 className="mb-2 font-medium">{product.name || 'Без названия'}</h3>

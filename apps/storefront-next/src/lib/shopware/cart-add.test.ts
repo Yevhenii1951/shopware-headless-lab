@@ -3,7 +3,7 @@ import { addToCart } from './cart'
 
 describe('addToCart', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     process.env.NEXT_PUBLIC_SHOPWARE_STORE_API_URL = 'http://localhost:8000/store-api'
     process.env.SHOPWARE_STORE_API_ACCESS_KEY = 'test-access-key'
   })
@@ -15,6 +15,7 @@ describe('addToCart', () => {
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
+      headers: new Headers(),
       json: async () => mockResponse,
     } as Response)
     vi.stubGlobal('fetch', fetchMock)

@@ -1,8 +1,12 @@
 import Link from 'next/link'
-import { cookies } from 'next/headers'
-import { getCart } from '@/lib/shopware/cart'
-import { removeFromCart } from '@/lib/shopware/cart'
+import {
+  getCart,
+  removeFromCart,
+  updateCartItemQuantity,
+} from '@/lib/shopware/cart'
 import { redirect } from 'next/navigation'
+
+export const instant = false
 
 async function removeItemAction(formData: FormData) {
   'use server'
@@ -12,9 +16,25 @@ async function removeItemAction(formData: FormData) {
   redirect('/cart')
 }
 
+async function updateQuantityAction(formData: FormData) {
+  'use server'
+  const lineItemId = formData.get('lineItemId')
+  const quantity = Number(formData.get('quantity'))
+
+  if (
+    typeof lineItemId !== 'string' ||
+    !lineItemId ||
+    !Number.isSafeInteger(quantity) ||
+    quantity < 1
+  ) {
+    return
+  }
+
+  await updateCartItemQuantity(lineItemId, quantity)
+  redirect('/cart')
+}
+
 export default async function CartPage() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('sw-context-token')?.value
   const items = await getCart().catch(() => [])
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -40,6 +60,34 @@ export default async function CartPage() {
                   <p className="text-sm text-gray-600">Кол-во: {item.quantity}</p>
                 </div>
                 <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2" aria-label={`Количество ${item.name}`}>
+                    <form action={updateQuantityAction}>
+                      <input type="hidden" name="lineItemId" value={item.id} />
+                      <input type="hidden" name="quantity" value={item.quantity - 1} />
+                      <button
+                        type="submit"
+                        disabled={item.quantity === 1}
+                        className="rounded border px-2 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label={`Уменьшить количество ${item.name}`}
+                      >
+                        −
+                      </button>
+                    </form>
+                    <span className="min-w-5 text-center text-sm" aria-label={`Количество: ${item.quantity}`}>
+                      {item.quantity}
+                    </span>
+                    <form action={updateQuantityAction}>
+                      <input type="hidden" name="lineItemId" value={item.id} />
+                      <input type="hidden" name="quantity" value={item.quantity + 1} />
+                      <button
+                        type="submit"
+                        className="rounded border px-2 py-1 text-sm"
+                        aria-label={`Увеличить количество ${item.name}`}
+                      >
+                        +
+                      </button>
+                    </form>
+                  </div>
                   <p className="text-sm text-gray-700">{(item.price * item.quantity).toFixed(2)} €</p>
                   <form action={removeItemAction}>
                     <input type="hidden" name="lineItemId" value={item.id} />

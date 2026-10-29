@@ -3,7 +3,7 @@ import { getProducts } from './products'
 
 describe('getProducts', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     process.env.NEXT_PUBLIC_SHOPWARE_STORE_API_URL = 'http://localhost:8000/store-api'
     process.env.SHOPWARE_STORE_API_ACCESS_KEY = 'test-access-key'
   })

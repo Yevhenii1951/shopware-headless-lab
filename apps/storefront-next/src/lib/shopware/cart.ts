@@ -1,4 +1,4 @@
-import { shopwareFetch } from './client'
+import { shopwareCartFetch } from './cart-client'
 
 export type CartItem = {
   id: string
@@ -8,7 +8,7 @@ export type CartItem = {
 }
 
 export const getCart = async (): Promise<CartItem[]> => {
-  const data = await shopwareFetch<{ lineItems?: Array<{ id: string; quantity: number; label?: string; price?: { unitPrice?: number } }> }>(
+  const data = await shopwareCartFetch<{ lineItems?: Array<{ id: string; quantity: number; label?: string; price?: { unitPrice?: number } }> }>(
     '/checkout/cart',
     undefined,
     'GET'
@@ -24,7 +24,7 @@ export const getCart = async (): Promise<CartItem[]> => {
 }
 
 export const addToCart = async (productId: string, quantity: number = 1) => {
-  const data = await shopwareFetch<{ lineItems?: CartItem[] }>(
+  const data = await shopwareCartFetch<{ lineItems?: CartItem[] }>(
     '/checkout/cart/line-item',
     {
       items: [
@@ -35,16 +35,32 @@ export const addToCart = async (productId: string, quantity: number = 1) => {
         },
       ],
     },
-    'POST'
+    'POST',
+    true
   )
   return data
 }
 
 export const removeFromCart = async (lineItemId: string) => {
-  const data = await shopwareFetch<any>(
+  const data = await shopwareCartFetch<unknown>(
     `/checkout/cart/line-item/${lineItemId}`,
     undefined,
-    'DELETE'
+    'DELETE',
+    true
   )
   return data
+}
+
+export const updateCartItemQuantity = async (
+  lineItemId: string,
+  quantity: number
+): Promise<unknown> => {
+  return shopwareCartFetch<unknown>(
+    '/checkout/cart/line-item',
+    {
+      items: [{ id: lineItemId, quantity }],
+    },
+    'PATCH',
+    true
+  )
 }

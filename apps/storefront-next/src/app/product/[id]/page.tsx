@@ -3,6 +3,8 @@ import { getProductById } from '@/lib/shopware/products'
 import { addToCart } from '@/lib/shopware/cart'
 import { redirect } from 'next/navigation'
 
+export const instant = false
+
 async function addToCartAction(formData: FormData) {
   'use server'
   const productId = formData.get('productId') as string
