@@ -157,6 +157,7 @@ export default async function CartPage({
           <button type="submit" className="text-sm text-blue-600 hover:underline">Выйти</button>
         </form>
       </div>
+      <p className="mt-2 text-sm"><Link href="/orders" className="text-blue-600 hover:underline">Мои заказы</Link></p>
 
       {confirmedOrderNumber && (
         <p role="status" className="mb-4 rounded border border-green-300 bg-green-50 p-3 text-sm text-green-800">

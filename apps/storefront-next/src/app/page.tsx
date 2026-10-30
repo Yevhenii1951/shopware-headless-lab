@@ -23,6 +23,7 @@ export default async function Home({ searchParams }: { searchParams: HomeSearchP
         <h1 className="text-2xl font-bold">Shopware Headless Lab</h1>
         <div className="flex items-center gap-4 text-sm text-blue-600">
           {customer ? <span className="text-gray-700">{customer.email}</span> : <Link href="/login" className="hover:underline">Войти</Link>}
+          <Link href="/orders" className="hover:underline">Заказы</Link>
           <Link href="/cart" className="hover:underline">Корзина</Link>
         </div>
       </div>
